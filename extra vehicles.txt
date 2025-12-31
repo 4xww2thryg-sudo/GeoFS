@@ -1,0 +1,266 @@
+ ==UserScript==
+ @name         GeoFS Extra Vehicles
+ @version      1.2
+ @description  Adds extra vehicles to GeoFS
+ @author       AF267
+ @match        httpsgeo-fs.comgeofs.php
+ @match        https.geo-fs.comgeofs.php
+ @icon         httpswww.google.coms2faviconssz=64&domain=geo-fs.com
+ @grant        none
+ ==UserScript==
+
+(function () {
+    'use strict';
+    console.log(Extras script running...);
+
+     ALWAYS CHANGE BACK TO THIS
+     httpsraw.githubusercontent.comaf267GeoFS-Extra-Vehiclesrefsheadsmainvehicles.json
+    const DATA_URL = httpsraw.githubusercontent.comaf267GeoFS-Extra-Vehiclesrefsheadsmainvehicles.json;
+
+    const aircraftButton = document.querySelector('button[data-toggle-panel=.geofs-aircraft-list]');
+    if (!aircraftButton) {
+        console.warn(Aircraft button not found.);
+        return;
+    }
+
+    const extrasButton = aircraftButton.cloneNode(true);
+    extrasButton.textContent = Extras;
+    extrasButton.removeAttribute(data-toggle-panel);
+    extrasButton.setAttribute(data-toggle-panel, .geofs-extras-list);
+    extrasButton.id = extras-button;
+    aircraftButton.parentNode.insertBefore(extrasButton, aircraftButton);
+
+    const extrasPanel = document.createElement(ul);
+    extrasPanel.className = geofs-list geofs-extras-list geofs-toggle-panel;
+
+     create div, temporary header only
+    extrasPanel.innerHTML = `
+        div style=display flex; align-items center; gap 10px; padding-left 20px;
+            img src=httpsraw.githubusercontent.comaf267GeoFS-Extra-VehiclesrefsheadsmainJXT%20Logo.png style=width 100px; height auto; 
+            h4 style=margin 0;GeoFS Extra Vehiclesh4
+        div
+    `;
+
+    const aircraftPanel = document.querySelector(.geofs-aircraft-list);
+    if (aircraftPanel && aircraftPanel.parentNode) {
+        aircraftPanel.parentNode.insertBefore(extrasPanel, aircraftPanel.nextSibling);
+    }
+
+    function createCategorySection(title, items) {
+        const category = document.createElement(li);
+        category.className = geofs-list-collapsible-item;
+        category.textContent = title;
+
+        const sublist = document.createElement(ul);
+        sublist.className = geofs-collapsible;
+
+        items.forEach(item = {
+            const li = document.createElement(li);
+            li.setAttribute(data-url, item.url);
+            li.setAttribute(data-mpid, item.id);
+
+            const itemContent = document.createElement(span);
+            const nameText = document.createTextNode(item.name);
+            itemContent.appendChild(nameText);
+            if (item.mp) {
+                const mpIcon = document.createElement(img);
+                mpIcon.style.width = 20px;
+                mpIcon.style.height = 20px;
+                mpIcon.style.marginLeft = 8px;
+
+                if (item.mp === green) {
+                    mpIcon.src = httpsraw.githubusercontent.comaf267GeoFS-Extra-Vehiclesrefsheadsmaingreen.png;
+                } else if (item.mp === yellow) {
+                    mpIcon.src = httpsraw.githubusercontent.comaf267GeoFS-Extra-Vehiclesrefsheadsmainyellow.png;
+                } else if (item.mp === red) {
+                    mpIcon.src = httpsraw.githubusercontent.comaf267GeoFS-Extra-Vehiclesrefsheadsmainred.png;
+                }
+
+                itemContent.appendChild(mpIcon);
+            }
+            if (item.ls) {
+                const lsIcon = document.createElement(img);
+                lsIcon.style.width = 20px;
+                lsIcon.style.height = 20px;
+                lsIcon.style.marginLeft = 8px;
+
+                if (item.ls === 1) {
+                    lsIcon.src = httpsraw.githubusercontent.comaf267GeoFS-Extra-Vehiclesrefsheadsmainls-logo.png;
+                }
+
+                itemContent.appendChild(lsIcon);
+            }
+
+            li.appendChild(itemContent);
+
+            sublist.appendChild(li);
+        });
+
+        category.appendChild(sublist);
+        return category;
+    }
+
+     add about section to the end
+    function appendAboutSection() {
+        const aboutSection = document.createElement(li);
+        aboutSection.className = geofs-list-collapsible-item;
+        aboutSection.textContent = About;
+
+        const aboutContent = document.createElement(ul);
+        aboutContent.className = geofs-collapsible;
+        aboutContent.innerHTML = `
+            a href=httpsgithub.comaf267GeoFS-Extra-Vehicles target=_blank rel=nofollowh4Current Version 1.2h4a
+            pGeoFS Extra Vehicles is a privately maintained addon not associated with GeoFS.p
+            pGeoFS Extra Vehicles is an addon developed by AF267 that adds external vehicles from JAaMDG's JXT Group as well as unreleased projects into the simulator.p
+            h5Multiplayer Modelsh5
+            spanimg src=httpsraw.githubusercontent.comaf267GeoFS-Extra-Vehiclesrefsheadsmaingreen.png style=width 24px; height auto; margin 8pxMultiplayer model supportedspan
+            br
+            spanimg src=httpsraw.githubusercontent.comaf267GeoFS-Extra-Vehiclesrefsheadsmainyellow.png style=width 24px; height auto; margin 8pxMultiplayer model shows, but of another similar vehiclespan
+            br
+            spanimg src=httpsraw.githubusercontent.comaf267GeoFS-Extra-Vehiclesrefsheadsmainred.png style=width 24px; height auto; margin 8pxMultiplayer model not supportedspan
+            br
+            spanimg src=httpsraw.githubusercontent.comaf267GeoFS-Extra-Vehiclesrefsheadsmainls-logo.png style=width 24px; height auto; margin 8pxCompatible with a src=httpsgithub.comkolos26GEOFS-LiverySelector target=_blankLiverySelectora (must be enabled, does not guarantee multiplayer liveries supported)span
+            pIf you have any questions or if you have an aircraft (must have a working aircraft.json) you would like to add, visit the JAaMDG Discordp
+            a href=httpsdiscord.ggfcFQH6Qhb7 target=_blank rel=nofollowimg src=httpswww.geo-fs.comimagesdiscord.png style=margin 10px 10px 10px 0px;a
+            pCopyright © AF267 - 2025p
+        `;
+        aboutSection.appendChild(aboutContent);
+        extrasPanel.appendChild(aboutSection);
+    }
+
+    function loadAircraftFromUrl(baseUrl, mpID) {
+        $.ajax(baseUrl + aircraft.json, {
+            dataType text,
+            success function (jsonText) {
+                var customRecord = {
+                    id custom_ + Date.now(),
+                    name Custom Aircraft,
+                    fullPath baseUrl,
+                    isPremium false,
+                    isCommunity false,
+                    definition btoa(jsonText),
+                    multiplayerFiles [
+                        baseUrl + multiplayer.glb,
+                        baseUrl + multiplayer-low.glb
+                    ]
+                };
+
+                var parsedDefinition = geofs.aircraft.instance.parseRecord(JSON.stringify(customRecord));
+
+                if (parsedDefinition) {
+                    geofs.aircraft.instance.unloadAircraft();
+                    customRecord.id = mpID;
+                    geofs.aircraft.instance.id = mpID;
+                    geofs.aircraft.instance.fullPath = customRecord.fullPath;
+                    geofs.aircraft.instance.aircraftRecord = customRecord;
+                    geofs.aircraft.instance.init(parsedDefinition, geofs.aircraft.instance.getCurrentCoordinates());
+
+                } else {
+                    ui.notification.show(Failed to parse aircraft.json);
+                }
+            },
+            error function () {
+                ui.notification.show(Could not load aircraft.json);
+            }
+        });
+    }
+
+    extrasPanel.addEventListener(click, function (e) {
+        const li = e.target.closest(li[data-url]);
+        if (li) {
+            const url = li.getAttribute(data-url);
+            const mpID = li.getAttribute(data-mpid);
+            loadAircraftFromUrl(url, mpID);
+        }
+    });
+
+    fetch(DATA_URL)
+        .then(response = response.json())
+        .then(data = {
+            for (const [category, items] of Object.entries(data)) {
+                const section = createCategorySection(category, items);
+                extrasPanel.appendChild(section);
+            }
+            appendAboutSection();
+        })
+        .catch(error = {
+            console.error(Error loading vehicle data, error);
+
+             emergency purposes backup
+            extrasPanel.innerHTML += `
+                div style=display flex; align-items center; gap 10px; padding-left 20px;
+                    img src=httpsraw.githubusercontent.comaf267GeoFS-Extra-VehiclesrefsheadsmainJXT%20Logo.png style=width 100px; height auto; 
+                    h4 style=margin 0;GeoFS Extra Vehiclesh4
+                    pError Too many requests to GitHub. Could not load latest JSON data. Last updated vehicles
+                div
+                li class=geofs-list-collapsible-item
+                    Aircraft
+                    ul class=geofs-collapsible
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositorymd11_380019_5369 data-mpid=1023McDonnell Douglas MD-11 (ADSB)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositoryc25a_380019_5367 data-mpid=1021Cessna Citation CJ2 (ADSB)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositoryheli_380019_5371 data-mpid=1025Eurocopter AS365 Dauphin (ADSB)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositorye190_380019_5372 data-mpid=1018Embraer E190 (ADSB)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositorycrj900_380019_5389 data-mpid=1016Bombardier CRJ900 (ADSB)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositoryA160_267286_3007 data-mpid=50Paramotor (by AF267)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositoryP180Y_267286_3557 data-mpid=2000Starship SN5 (by AF267)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositoryNK-V_267286_2525 data-mpid=1014Ilyushin Il-76TD (by AF267)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositoryPiper%20XCub_380019_3226 data-mpid=1Piper PA-18 Super Cub (GeoFS)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositoryCessna%20Skymaster%20(NightheartKitten-cat)_380019_4792 data-mpID=2Cessna 337 Super Skymaster (by Nightheart)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositoryHang%20Glider%20Belgium_380019_3111 data-mpid=50Hang Glider Belgium (by Johani)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositorySikorsky UH-60 Black Hawk_380019_3068 data-mpid=2806Sikorsky UH-60 Black Hawk (by Spice_9)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositoryc650_380019_5390 data-mpid=2706Bombardier Challenger 650 (by Ryan Xu)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepository717_380019_5380 data-mpid=1015Boeing 717-200 (by Plane2222222)li
+                    ul
+                li
+                li class=geofs-list-collapsible-item
+                    Ground Vehicles
+                    ul class=geofs-collapsible
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositorytruck_380019_5368 data-mpid=1027Food Service Truck (ADSB)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositoryNeoAD XTerra_267286_4894 data-mpid=1027XTerra SUV (2024 APRIL FOOLS) (by AF267)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositorySteelbird Sagittarius Pulsar_267286_5155 data-mpid=102Sagittarius Hypercar (2025 APRIL FOOLS) (by AF267)li
+                    ul
+                li
+                li class=geofs-list-collapsible-item
+                    Miscellaneous
+                    ul class=geofs-collapsible
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositoryCMV Probability_267286_5009 data-mpid=2000CMV Probability Megayacht (2025 APRIL FOOLS) (by AF267)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositoryX2000BWB_267286_2329 data-mpid=2000Northtech RADIO (2025 APRIL FOOLS) (by AF267)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositoryNorthtech UTOPIA_267286_4136 data-mpid=2000Northtech UTOPIA (by AF267)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositoryARCHANGEL_267286_3974 data-mpid=2000Northtech ARCHANGEL (2023 APRIL FOOLS) (by AF267)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositoryProximus Hovercraft_267286_4644 data-mpid=2000Proximus Hovercraft (by AF267)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositoryWK2 testbed_267286_2783 data-mpid=5193Boeing 747x (2025 APRIL FOOLS) (by AF267)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositorytype055_380019_5388 data-mpid=2000Type 055 Destroyer (by MirageModels)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositoryJetpack_380019_5385 data-mpid=103Jetpack Wingsuit (by GeoFS & Nightheart)li
+                    ul
+                li
+                li class=geofs-list-collapsible-item
+                    Archived
+                    ul class=geofs-collapsible
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositoryalphajet_380019_5403 data-mpid=3Dassault-Dornier Alpha Jet (by GeoFS)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositorydc3_380019_5401 data-mpid=16Douglas DC-3 (by GeoFS)li
+                        li data-url=httpswww.geo-fs.combackendaircraftrepositorya380_380019_5402 data-mpid=1012Airbus A380 (by GeoFS)li
+                    ul
+                li
+                li class=geofs-list-collapsible-item
+                    About
+                    ul class=geofs-collapsible
+                        a href=httpsgithub.comaf267GeoFS-Extra-Vehicles target=_blank rel=nofollowh4Current Version 1.2h4a
+                        pGeoFS Extra Vehicles is a privately maintained addon not associated with GeoFS.p
+                        pGeoFS Extra Vehicles is an addon developed by AF267 that adds external vehicles from JAaMDG's JXT Group as well as unreleased projects into the simulator.p
+                        h5Multiplayer Modelsh5
+                        spanimg src=httpsraw.githubusercontent.comaf267GeoFS-Extra-Vehiclesrefsheadsmaingreen.png style=width 24px; height auto; margin 8pxMultiplayer model supportedspan
+                        br
+                        spanimg src=httpsraw.githubusercontent.comaf267GeoFS-Extra-Vehiclesrefsheadsmainyellow.png style=width 24px; height auto; margin 8pxMultiplayer model shows, but of another similar vehiclespan
+                        br
+                        spanimg src=httpsraw.githubusercontent.comaf267GeoFS-Extra-Vehiclesrefsheadsmainred.png style=width 24px; height auto; margin 8pxMultiplayer model not supportedspan
+                        br
+                        spanimg src=httpsraw.githubusercontent.comaf267GeoFS-Extra-Vehiclesrefsheadsmainls-logo.png style=width 24px; height auto; margin 8pxCompatible with a src=httpsgithub.comkolos26GEOFS-LiverySelector target=_blankLiverySelectora (must be enabled, does not guarantee multiplayer liveries supported)span
+                        pIf you have any questions or if you have an aircraft (must have a working aircraft.json) you would like to add, visit the JAaMDG Discordp
+                        a href=httpsdiscord.ggfcFQH6Qhb7 target=_blank rel=nofollowimg src=httpswww.geo-fs.comimagesdiscord.png style=margin 10px 10px 10px 0px;a
+                        pCopyright © AF267 - 2025p
+                    ul
+                li
+            `;
+        });
+
+})();
